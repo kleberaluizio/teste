@@ -2,6 +2,7 @@ package com.gesplan.calculadoradeemprestimo.model;
 
 import com.gesplan.calculadoradeemprestimo.exception.InitialDateAfterFinalDateException;
 import com.gesplan.calculadoradeemprestimo.model.dto.LoanInfoDTO;
+import java.time.Period;
 import java.time.temporal.ChronoUnit;
 
 public class LoanConstants
@@ -35,6 +36,6 @@ public class LoanConstants
 
 	private int getInstallmentsNumber(LoanInfoDTO dto)
 	{
-		return (int) ChronoUnit.MONTHS.between(dto.getInitialDate(), dto.getFinalDate());
+		return (int) ChronoUnit.MONTHS.between(dto.getFirstPaymentDate(), dto.getFinalDate()) + 2;
 	}
 }

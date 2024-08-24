@@ -20,7 +20,7 @@ public class LoanCalculatorServiceImpl implements LoanCalculatorService
 	private LoanInfoDTO loanInfo;
 
 	@Override
-	public List<LoanFinancialSummaryDTO> getLoanFinancialSummary(LoanInfoDTO loanInfoDTO)
+	public List<LoanFinancialSummary> getLoanFinancialSummary(LoanInfoDTO loanInfoDTO)
 	{
 		assertValidDates(loanInfoDTO);
 		setAttributes(loanInfoDTO);
@@ -28,15 +28,22 @@ public class LoanCalculatorServiceImpl implements LoanCalculatorService
 		List<LoanFinancialSummary> financialSummaries = new ArrayList<>();
 		createFinancialSummaries(financialSummaries);
 
-		return financialSummaries.stream().map(LoanFinancialSummary::convertToDTO)
-			.collect(Collectors.toList());
+		return financialSummaries;
 	}
 
 	private void createFinancialSummaries(List<LoanFinancialSummary> financialSummaries)
 	{
 		createFirstSummary(financialSummaries);
-		createPrePaymentsSummaries(financialSummaries);
-		createRemainingSummaries(financialSummaries);
+
+		if (getMonthsUntilPaymentStart(loanInfo) > 0)
+		{
+			createPrePaymentsLastDayOfMonthSummaries(financialSummaries);
+		}
+
+		if (loanConstants.getTotalInstallments() > 0)
+		{
+			createRemainingSummaries(financialSummaries);
+		}
 	}
 
 	private void createFirstSummary(List<LoanFinancialSummary> summaries)
@@ -45,58 +52,53 @@ public class LoanCalculatorServiceImpl implements LoanCalculatorService
 		summaries.add(firstSummary);
 	}
 
-	private void createPrePaymentsSummaries(List<LoanFinancialSummary> summaries)
+	private void createPrePaymentsLastDayOfMonthSummaries(List<LoanFinancialSummary> summaries)
 	{
-		if (getMonthsUntilPaymentStart(loanInfo) == 0)
+		LocalDate lastDayOfMonth = getLastDayOfMonth(loanInfo.getInitialDate());
+
+		while (loanInfo.getFirstPaymentDate().isAfter(lastDayOfMonth))
 		{
-			return;
-		}
-
-		LocalDate compensatedDate = getLastDayOfMonth(loanInfo.getInitialDate());
-		LoanFinancialSummary summary;
-
-		while (loanInfo.getFirstPaymentDate().isAfter(compensatedDate))
-		{
-			summary = new LoanFinancialSummary(summaries.getLast(), loanConstants, 0, compensatedDate);
-
-			summaries.add(summary);
-
-			compensatedDate = compensatedDate.plusMonths(1);
+			addNoInstallmentSummary(summaries,lastDayOfMonth);
+			lastDayOfMonth = lastDayOfMonth.plusMonths(1);
 		}
 	}
 
 	private void createRemainingSummaries(List<LoanFinancialSummary> summaries)
 	{
-		if (loanConstants.getTotalInstallments() == 0)
-		{
-			return;
-		}
-
-		LocalDate compensatedDate = loanInfo.getFirstPaymentDate();
-		LoanFinancialSummary summary;
+		LocalDate paymentDate = loanInfo.getFirstPaymentDate();
 		int installment = 1;
 
-		while (loanInfo.getFinalDate().isAfter(compensatedDate))
+		while (loanInfo.getFinalDate().isAfter(paymentDate))
 		{
-			summary = new LoanFinancialSummary(summaries.getLast(), loanConstants, installment,
-				compensatedDate);
-			summaries.add(summary);
+			addInstallmentSummary(summaries, installment, paymentDate);
 
-			if (compensatedDate.isBefore(getLastDayOfMonth(compensatedDate)))
+			LocalDate lastDayOfMonth = getLastDayOfMonth(paymentDate);
+			if (paymentDate.isBefore(lastDayOfMonth))
 			{
-				summary = new LoanFinancialSummary(summaries.getLast(), loanConstants, 0,
-					getLastDayOfMonth(compensatedDate));
-				summaries.add(summary);
+				addNoInstallmentSummary(summaries, lastDayOfMonth);
 			}
 
-			compensatedDate = compensatedDate.plusMonths(1);
+			paymentDate = paymentDate.plusMonths(1);
 			installment++;
 		}
 
-		summary = new LoanFinancialSummary(summaries.getLast(), loanConstants, installment,
-			loanInfo.getFinalDate());
+		// Add the last installment on the final date of the loan
+		addInstallmentSummary(summaries, installment, loanInfo.getFinalDate());
+	}
 
-		summaries.add(summary);
+	private void addInstallmentSummary(List<LoanFinancialSummary> summaries, int installment,
+		LocalDate date)
+	{
+		summaries.add(
+			new LoanFinancialSummary(summaries.getLast(), loanConstants, installment, date)
+		);
+	}
+
+	private void addNoInstallmentSummary(List<LoanFinancialSummary> summaries, LocalDate date)
+	{
+		summaries.add(
+			new LoanFinancialSummary(summaries.getLast(), loanConstants, 0, date)
+		);
 	}
 
 	private int getMonthsUntilPaymentStart(LoanInfoDTO dto)

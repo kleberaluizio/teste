@@ -8,6 +8,7 @@ import com.gesplan.calculadoradeemprestimo.model.dto.LoanInfoDTO;
 import com.gesplan.calculadoradeemprestimo.service.LoanCalculatorService;
 import jakarta.validation.Valid;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -33,8 +34,14 @@ public class LoanCalculatorController
 	{
 		try
 		{
-			List<LoanFinancialSummaryDTO> financialSummaries = service.getLoanFinancialSummary(loanInfoDTO);
-			return ResponseEntity.status(HttpStatus.OK).body(financialSummaries);
+			List<LoanFinancialSummary> financialSummaries = service.getLoanFinancialSummary(loanInfoDTO);
+
+			return ResponseEntity.status(HttpStatus.OK).body(
+				financialSummaries
+					.stream()
+					.map(LoanFinancialSummary::convertToDTO)
+					.collect(Collectors.toList())
+			);
 		}
 		catch (InitialDateAfterFinalDateException | FirstPaymentDateOutOfRangeException e)
 		{

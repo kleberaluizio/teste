@@ -12,9 +12,9 @@ class LoanCalculatorServiceImplTest
 {
 	LoanCalculatorService loanCalculatorService = new LoanCalculatorServiceImpl();
 
-	@DisplayName("Assert throws InitialDateAfterFinalDateException")
+	@DisplayName("Should throws InitialDateAfterFinalDateException")
 	@Test
-	public void assertThrowsInitialDateAfterFinalDateException()
+	public void shouldThrowsInitialDateAfterFinalDateException()
 	{
 		LoanInfoDTO loanInfoDTO = createGenericInfoDTO();
 		loanInfoDTO.setInitialDate("2024-08-30");
@@ -25,9 +25,9 @@ class LoanCalculatorServiceImplTest
 		});
 	}
 
-	@DisplayName("Assert throws FirstPaymentDateOutOfRangeException - First Payment After Final Date")
+	@DisplayName("Should throws FirstPaymentDateOutOfRangeException - First Payment After Final Date")
 	@Test
-	public void assertThrowsFirstPaymentDateOutOfRangeExceptionWhenFirstPaymentAfterFinalDate()
+	public void shouldThrowsFirstPaymentDateOutOfRangeExceptionWhenFirstPaymentAfterFinalDate()
 	{
 		LoanInfoDTO loanInfoDTO = createGenericInfoDTO();
 		loanInfoDTO.setInitialDate("2024-08-01");
@@ -39,9 +39,9 @@ class LoanCalculatorServiceImplTest
 		});
 	}
 
-	@DisplayName("Assert throws FirstPaymentDateOutOfRangeException - First Payment Before Initial Date")
+	@DisplayName("Should throws FirstPaymentDateOutOfRangeException - First Payment Before Initial Date")
 	@Test
-	public void assertThrowsFirstPaymentDateOutOfRangeExceptionWhenFirstPaymentBeforeInitialDate()
+	public void shouldThrowFirstPaymentDateOutOfRangeExceptionWhenFirstPaymentBeforeInitialDate()
 	{
 		LoanInfoDTO loanInfoDTO = createGenericInfoDTO();
 		loanInfoDTO.setInitialDate("2024-08-01");
@@ -60,5 +60,4 @@ class LoanCalculatorServiceImplTest
 		dto.setLoanAmount(1000000.0);
 		return dto;
 	}
-
 }
