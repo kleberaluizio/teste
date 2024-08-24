@@ -1,11 +1,11 @@
 package com.gesplan.calculadoradeemprestimo.model;
 
-import com.gesplan.calculadoradeemprestimo.model.dto.LoanFinancialSummaryDTO;
+import com.gesplan.calculadoradeemprestimo.model.dto.LoanFinancialRecordDTO;
 import com.gesplan.calculadoradeemprestimo.model.dto.LoanInfoDTO;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 
-public class LoanFinancialSummary
+public class LoanFinancialRecord
 {
 	private String competenceDate;
 	private double loanAmount;
@@ -18,7 +18,7 @@ public class LoanFinancialSummary
 	private double accumulated;
 	private double paid;
 
-	public LoanFinancialSummary(LoanInfoDTO loanInputInfo)
+	public LoanFinancialRecord(LoanInfoDTO loanInputInfo)
 	{
 		/* The order of the following lines should not be changed */
 		this.setCompetenceDate(loanInputInfo.getInitialDate());
@@ -33,7 +33,7 @@ public class LoanFinancialSummary
 		this.setOutstandingAmount();
 	}
 
-	public LoanFinancialSummary(LoanFinancialSummary previousSummary,
+	public LoanFinancialRecord(LoanFinancialRecord previousSummary,
 		LoanConstants loanConstants, int installmentNumber, LocalDate competenceDate)
 	{
 		/* The order of the following lines should not be changed */
@@ -60,7 +60,7 @@ public class LoanFinancialSummary
 		this.consolidated = installment == 0 ? "" : (installment + "/" + TotalInstallment);
 	}
 
-	private void setProvision(LoanFinancialSummary previous, LoanConstants constants)
+	private void setProvision(LoanFinancialRecord previous, LoanConstants constants)
 	{
 		double adjustedInterestRate = constants.getInterestRate() + 1;
 		double timeFactor = getDaysBetweenSummaries(previous) / LoanConstants.BASE_DAYS;
@@ -69,19 +69,19 @@ public class LoanFinancialSummary
 		this.provision = ((Math.pow(adjustedInterestRate, timeFactor)) - 1) * totalPreviousBalance;
 	}
 
-	private double getDaysBetweenSummaries(LoanFinancialSummary previous)
+	private double getDaysBetweenSummaries(LoanFinancialRecord previous)
 	{
 		LocalDate previousDate = LocalDate.parse(previous.getCompetenceDate());
 		LocalDate actualDate = LocalDate.parse(this.competenceDate);
 		return ChronoUnit.DAYS.between(previousDate, actualDate);
 	}
 
-	private void setPaid(LoanFinancialSummary previous)
+	private void setPaid(LoanFinancialRecord previous)
 	{
 		this.paid = this.consolidated.isBlank() ? 0 : (previous.getAccumulated() + this.provision);
 	}
 
-	private void setAccumulated(LoanFinancialSummary previous)
+	private void setAccumulated(LoanFinancialRecord previous)
 	{
 		this.accumulated = previous.getAccumulated() + this.provision - this.paid;
 	}
@@ -96,7 +96,7 @@ public class LoanFinancialSummary
 		this.totalPayment = this.consolidated.isBlank() ? 0 : (this.amortization + this.paid);
 	}
 
-	private void setBalance(LoanFinancialSummary previous)
+	private void setBalance(LoanFinancialRecord previous)
 	{
 		this.balance = previous.getBalance() - this.amortization;
 	}
@@ -121,9 +121,9 @@ public class LoanFinancialSummary
 		return accumulated;
 	}
 
-	public LoanFinancialSummaryDTO convertToDTO()
+	public LoanFinancialRecordDTO convertToDTO()
 	{
-		return new LoanFinancialSummaryDTO(
+		return new LoanFinancialRecordDTO(
 			this.competenceDate,
 			this.loanAmount,
 			this.outstandingAmount,

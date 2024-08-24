@@ -1,6 +1,6 @@
 package com.gesplan.calculadoradeemprestimo.model.dto;
 
-public record LoanFinancialSummaryDTO(
+public record LoanFinancialRecordDTO(
 	String competenceDate,
 	double loanAmount,
 	double outstandingAmount,
