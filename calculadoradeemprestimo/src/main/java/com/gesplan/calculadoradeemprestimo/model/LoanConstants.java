@@ -1,8 +1,6 @@
 package com.gesplan.calculadoradeemprestimo.model;
 
-import com.gesplan.calculadoradeemprestimo.exception.InitialDateAfterFinalDateException;
 import com.gesplan.calculadoradeemprestimo.model.dto.LoanInfoDTO;
-import java.time.Period;
 import java.time.temporal.ChronoUnit;
 
 public class LoanConstants

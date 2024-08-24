@@ -25,7 +25,7 @@ class LoanCalculatorServiceImplTest
 		});
 	}
 
-	@DisplayName("Should throws FirstPaymentDateOutOfRangeException - First Payment After Final Date")
+	@DisplayName("Should throws FirstPaymentDateOutOfRangeException When First Payment After Final Date")
 	@Test
 	public void shouldThrowsFirstPaymentDateOutOfRangeExceptionWhenFirstPaymentAfterFinalDate()
 	{
@@ -39,7 +39,7 @@ class LoanCalculatorServiceImplTest
 		});
 	}
 
-	@DisplayName("Should throws FirstPaymentDateOutOfRangeException - First Payment Before Initial Date")
+	@DisplayName("Should throws FirstPaymentDateOutOfRangeException When First Payment Before Initial Date")
 	@Test
 	public void shouldThrowFirstPaymentDateOutOfRangeExceptionWhenFirstPaymentBeforeInitialDate()
 	{

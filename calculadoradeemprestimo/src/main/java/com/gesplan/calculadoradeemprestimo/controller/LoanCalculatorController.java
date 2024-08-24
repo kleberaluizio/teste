@@ -3,7 +3,6 @@ package com.gesplan.calculadoradeemprestimo.controller;
 import com.gesplan.calculadoradeemprestimo.exception.InitialDateAfterFinalDateException;
 import com.gesplan.calculadoradeemprestimo.exception.FirstPaymentDateOutOfRangeException;
 import com.gesplan.calculadoradeemprestimo.model.LoanFinancialSummary;
-import com.gesplan.calculadoradeemprestimo.model.dto.LoanFinancialSummaryDTO;
 import com.gesplan.calculadoradeemprestimo.model.dto.LoanInfoDTO;
 import com.gesplan.calculadoradeemprestimo.service.LoanCalculatorService;
 import jakarta.validation.Valid;

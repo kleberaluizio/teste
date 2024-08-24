@@ -4,13 +4,11 @@ import com.gesplan.calculadoradeemprestimo.exception.InitialDateAfterFinalDateEx
 import com.gesplan.calculadoradeemprestimo.exception.FirstPaymentDateOutOfRangeException;
 import com.gesplan.calculadoradeemprestimo.model.LoanConstants;
 import com.gesplan.calculadoradeemprestimo.model.LoanFinancialSummary;
-import com.gesplan.calculadoradeemprestimo.model.dto.LoanFinancialSummaryDTO;
 import com.gesplan.calculadoradeemprestimo.model.dto.LoanInfoDTO;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 
 @Service

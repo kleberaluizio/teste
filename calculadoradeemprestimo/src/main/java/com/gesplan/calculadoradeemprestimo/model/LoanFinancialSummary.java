@@ -18,10 +18,6 @@ public class LoanFinancialSummary
 	private double accumulated;
 	private double paid;
 
-	private LoanFinancialSummary()
-	{
-	}
-
 	public LoanFinancialSummary(LoanInfoDTO loanInputInfo)
 	{
 		/* The order of the following lines should not be changed */
