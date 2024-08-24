@@ -1,69 +1,63 @@
 package com.gesplan.calculadoradeemprestimo.model.dto;
 
-import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
 public class LoanInfoDTO
 {
 
-	@NotNull
 	private LocalDate initialDate;
-	@NotNull
 	private LocalDate finalDate;
-	@NotNull
 	private LocalDate firstPaymentDate;
-	@NotNull
 	private double loanAmount;
-	@NotNull
 	private double interestRate;
 
-	public @NotNull LocalDate getInitialDate()
+	public LocalDate getInitialDate()
 	{
 		return initialDate;
 	}
 
-	public void setInitialDate(@NotNull String initialDate)
+	public void setInitialDate(String initialDate)
 	{
 		this.initialDate = parseToLocalDate(initialDate);
 	}
 
-	public @NotNull LocalDate getFinalDate()
+	public  LocalDate getFinalDate()
 	{
 		return finalDate;
 	}
 
-	public void setFinalDate(@NotNull String finalDate)
+	public void setFinalDate(String finalDate)
 	{
 		this.finalDate = parseToLocalDate(finalDate);
 	}
 
-	public @NotNull LocalDate getFirstPaymentDate()
+	public  LocalDate getFirstPaymentDate()
 	{
 		return firstPaymentDate;
 	}
 
-	public void setFirstPaymentDate(@NotNull String firstPaymentDate)
+	public void setFirstPaymentDate(String firstPaymentDate)
 	{
 		this.firstPaymentDate = parseToLocalDate(firstPaymentDate);
 	}
 
-	public @NotNull double getLoanAmount()
+	public  double getLoanAmount()
 	{
 		return loanAmount;
 	}
 
-	public void setLoanAmount(@NotNull double loanAmount)
+	public void setLoanAmount(double loanAmount)
 	{
 		this.loanAmount = loanAmount;
 	}
 
-	public @NotNull double getInterestRate()
+	public  double getInterestRate()
 	{
 		return interestRate;
 	}
 
-	public void setInterestRate(@NotNull double interestRate)
+	public void setInterestRate(double interestRate)
 	{
 		this.interestRate = interestRate;
 	}
