@@ -1,11 +1,11 @@
 package com.gesplan.calculadoradeemprestimo.model.dto;
 
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
-public class LoanInputInfoDTO{
+public class LoanInfoDTO
+{
 
 	@NotNull
 	private LocalDate initialDate;

@@ -1,143 +1,140 @@
 package com.gesplan.calculadoradeemprestimo.service;
 
+import com.gesplan.calculadoradeemprestimo.exception.InitialDateAfterFinalDateException;
+import com.gesplan.calculadoradeemprestimo.exception.FirstPaymentDateOutOfRangeException;
 import com.gesplan.calculadoradeemprestimo.model.LoanConstants;
 import com.gesplan.calculadoradeemprestimo.model.LoanFinancialSummary;
-import com.gesplan.calculadoradeemprestimo.model.dto.LoanInputInfoDTO;
+import com.gesplan.calculadoradeemprestimo.model.dto.LoanFinancialSummaryDTO;
+import com.gesplan.calculadoradeemprestimo.model.dto.LoanInfoDTO;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 
 @Service
 public class LoanCalculatorServiceImpl implements LoanCalculatorService
 {
-	private final static int BASE_DAYS = 360;
+	private LoanConstants loanConstants;
+	private LoanInfoDTO loanInfo;
 
 	@Override
-	public List<LoanFinancialSummary> getLoanFinancialSummary(LoanInputInfoDTO loanInfo)
+	public List<LoanFinancialSummaryDTO> getLoanFinancialSummary(LoanInfoDTO loanInfoDTO)
 	{
-		LoanConstants loanConstants = new LoanConstants(loanInfo);
+		assertValidDates(loanInfoDTO);
+		setAttributes(loanInfoDTO);
 
-		LocalDate firstPaymentDate = loanInfo.getFirstPaymentDate();
+		List<LoanFinancialSummary> financialSummaries = new ArrayList<>();
+		createFinancialSummaries(financialSummaries);
 
-		LoanFinancialSummary loanFinancialSummary = new LoanFinancialSummary();
-
-		List<LoanFinancialSummary> summariesBeforeStartPaying = getSummariesBeforeStartPaying(loanInfo);
-		double accumullated = getAccumullated(loanFinancialSummary)
-		loanFinancialSummary.setAccumulated(accumullated);
-
-
-		List<LoanFinancialSummary> LoanFinancialSummary = new ArrayList<>();
-		return List.of();
+		return financialSummaries.stream().map(LoanFinancialSummary::convertToDTO)
+			.collect(Collectors.toList());
 	}
 
-
-
-	private List<LoanFinancialSummary> getSummariesBeforeStartPaying(LoanInputInfoDTO loanInputInfo)
+	private void createFinancialSummaries(List<LoanFinancialSummary> financialSummaries)
 	{
-		int monthsUntilPaymentStart = getMonthsUntilPaymentStart(loanInputInfo);
+		createFirstSummary(financialSummaries);
+		createPrePaymentsSummaries(financialSummaries);
+		createRemainingSummaries(financialSummaries);
+	}
 
-		if (monthsUntilPaymentStart == 0)
+	private void createFirstSummary(List<LoanFinancialSummary> summaries)
+	{
+		LoanFinancialSummary firstSummary = new LoanFinancialSummary(loanInfo);
+		summaries.add(firstSummary);
+	}
+
+	private void createPrePaymentsSummaries(List<LoanFinancialSummary> summaries)
+	{
+		if (getMonthsUntilPaymentStart(loanInfo) == 0)
 		{
-			return List.of();
-		}
-		List<LoanFinancialSummary> LoanFinancialSummaries = new ArrayList<>();
-
-		for(int i = 0; i < monthsUntilPaymentStart; i++)
-		{
-			LoanFinancialSummary summary = new LoanFinancialSummary();
-
-			summary.setCompetenceDate(loanInputInfo.getInitialDate());
-			summary.setLoanAmount(loanInputInfo.getLoanAmount());
-			summary.setOutstandingAmount(loanInputInfo.getLoanAmount());
-			summary.setConsolidated("");
-			summary.setTotalPayment(0d);
-			summary.setAmortization(0d);
-			summary.setBalance(loanInputInfo.getLoanAmount());
-			summary.setProvision(0d);
-			summary.setLoanAmount(0d);
-			summary.setAccumulated(0d);
-			summary.setPaid(0d);
-
-//			private String competenceDate;
-//			private double loanAmount;
-//			private double outstandingAmount;
-//			private String Consolidated;
-//			private double total;
-//			private double amortization;
-//			private double balance;
-//			private double provision;
-//			private double accumulated;
-//			private double paid;
-
-
-			LoanFinancialSummaries.add(summary);
+			return;
 		}
 
-		return LoanFinancialSummaries;
-	}
-	private LoanFinancialSummary getFirstSummary(LoanInputInfoDTO loanInputInfo)
-	{
-		LoanFinancialSummary summary = new LoanFinancialSummary();
+		LocalDate compensatedDate = getLastDayOfMonth(loanInfo.getInitialDate());
+		LoanFinancialSummary summary;
 
-		summary.setCompetenceDate(loanInputInfo.getInitialDate());
-		summary.setLoanAmount(loanInputInfo.getLoanAmount());
-		summary.setOutstandingAmount(loanInputInfo.getLoanAmount());
-		summary.setConsolidated("");
-		summary.setTotalPayment(0d);
-		summary.setAmortization(0d);
-		summary.setBalance(loanInputInfo.getLoanAmount());
-		summary.setProvision(0d);
-		summary.setLoanAmount(0d);
-		summary.setAccumulated(0d);
-		summary.setPaid(0d);
-
-		return summary;
-	}
-
-	private double getProvision(LoanFinancialSummary actualSummary,
-		LoanFinancialSummary previousSummary)
-	{
-
-		return  BASE_DAYS - INTEREST_RATE + INSTALLMENTS + AMORTIZATION_VALUE;
-	}
-
-	private double getOutstandingAmount(LoanFinancialSummary summary)
-	{
-		return summary.getBalance() + summary.getAccumulated();
-	}
-
-	private double getBalance(LoanFinancialSummary actualSummary,
-		LoanFinancialSummary previousSummary)
-	{
-		return previousSummary.getBalance() - actualSummary.getAmortization();
-	}
-
-	private double getAccumullated(LoanFinancialSummary actualSummary,
-		LoanFinancialSummary previousSummary)
-	{
-		return previousSummary.getAccumulated() + actualSummary.getProvision() - actualSummary.getPaid();
-	}
-
-	private double getPaid(LoanFinancialSummary actualSummary,
-		LoanFinancialSummary previousSummary)
-	{
-		if (actualSummary.getConsolidated().isBlank())
+		while (loanInfo.getFirstPaymentDate().isAfter(compensatedDate))
 		{
-			return 0;
+			summary = new LoanFinancialSummary(summaries.getLast(), loanConstants, 0, compensatedDate);
+
+			summaries.add(summary);
+
+			compensatedDate = compensatedDate.plusMonths(1);
+		}
+	}
+
+	private void createRemainingSummaries(List<LoanFinancialSummary> summaries)
+	{
+		if (loanConstants.getTotalInstallments() == 0)
+		{
+			return;
 		}
 
-		return previousSummary.getAccumulated() + actualSummary.getProvision();
+		LocalDate compensatedDate = loanInfo.getFirstPaymentDate();
+		LoanFinancialSummary summary;
+		int installment = 1;
+
+		while (loanInfo.getFinalDate().isAfter(compensatedDate))
+		{
+			summary = new LoanFinancialSummary(summaries.getLast(), loanConstants, installment,
+				compensatedDate);
+			summaries.add(summary);
+
+			if (compensatedDate.isBefore(getLastDayOfMonth(compensatedDate)))
+			{
+				summary = new LoanFinancialSummary(summaries.getLast(), loanConstants, 0,
+					getLastDayOfMonth(compensatedDate));
+				summaries.add(summary);
+			}
+
+			compensatedDate = compensatedDate.plusMonths(1);
+			installment++;
+		}
+
+		summary = new LoanFinancialSummary(summaries.getLast(), loanConstants, installment,
+			loanInfo.getFinalDate());
+
+		summaries.add(summary);
 	}
 
-	private int getMonthsUntilPaymentStart(LoanInputInfoDTO dto)
+	private int getMonthsUntilPaymentStart(LoanInfoDTO dto)
 	{
-		//assertFirstGreaterThanInitial
-
 		return (int) ChronoUnit.MONTHS.between(dto.getInitialDate(), dto.getFirstPaymentDate());
 	}
 
+	private LocalDate getLastDayOfMonth(LocalDate date)
+	{
+		return date.withDayOfMonth(date.lengthOfMonth());
+	}
 
+	private void setAttributes(LoanInfoDTO loanInfoDTO)
+	{
+		loanConstants = new LoanConstants(loanInfoDTO);
+		loanInfo = loanInfoDTO;
+	}
 
+	private void assertValidDates(LoanInfoDTO dto)
+	{
+		assertFinalDateAfterInitialDate(dto);
+		assertFirstPaymentDateInRange(dto);
+	}
+
+	private void assertFinalDateAfterInitialDate(LoanInfoDTO dto)
+	{
+		if (dto.getInitialDate().isAfter(dto.getFinalDate()))
+		{
+			throw new InitialDateAfterFinalDateException();
+		}
+	}
+
+	private void assertFirstPaymentDateInRange(LoanInfoDTO dto)
+	{
+		if (dto.getFirstPaymentDate().isBefore(dto.getInitialDate()) || dto.getFirstPaymentDate()
+			.isAfter(dto.getFinalDate()))
+		{
+			throw new FirstPaymentDateOutOfRangeException();
+		}
+	}
 }

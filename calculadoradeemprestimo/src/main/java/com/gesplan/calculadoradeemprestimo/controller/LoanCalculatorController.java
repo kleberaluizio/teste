@@ -1,7 +1,10 @@
 package com.gesplan.calculadoradeemprestimo.controller;
 
+import com.gesplan.calculadoradeemprestimo.exception.InitialDateAfterFinalDateException;
+import com.gesplan.calculadoradeemprestimo.exception.FirstPaymentDateOutOfRangeException;
 import com.gesplan.calculadoradeemprestimo.model.LoanFinancialSummary;
-import com.gesplan.calculadoradeemprestimo.model.dto.LoanInputInfoDTO;
+import com.gesplan.calculadoradeemprestimo.model.dto.LoanFinancialSummaryDTO;
+import com.gesplan.calculadoradeemprestimo.model.dto.LoanInfoDTO;
 import com.gesplan.calculadoradeemprestimo.service.LoanCalculatorService;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -17,21 +20,29 @@ import org.springframework.web.bind.annotation.RestController;
 public class LoanCalculatorController
 {
 
-	private final LoanCalculatorService loanCalculatorService;
+	private final LoanCalculatorService service;
 
 	public LoanCalculatorController(LoanCalculatorService loanCalculatorService)
 	{
-		this.loanCalculatorService = loanCalculatorService;
+		this.service = loanCalculatorService;
 	}
 
 
-	@GetMapping
-	public ResponseEntity<List<LoanFinancialSummary>> getCalculateResult(
-		@RequestBody @Valid LoanInputInfoDTO loanInputInfoDTO)
+	@GetMapping("/financial-summaries")
+	public ResponseEntity<?> getCalculateResult(@RequestBody @Valid LoanInfoDTO loanInfoDTO)
 	{
-		List<LoanFinancialSummary> loanFinancialSummary = loanCalculatorService.getLoanFinancialSummary(
-			loanInputInfoDTO);
-
-		return ResponseEntity.status(HttpStatus.OK).body(loanFinancialSummary);
+		try
+		{
+			List<LoanFinancialSummaryDTO> financialSummaries = service.getLoanFinancialSummary(loanInfoDTO);
+			return ResponseEntity.status(HttpStatus.OK).body(financialSummaries);
+		}
+		catch (InitialDateAfterFinalDateException | FirstPaymentDateOutOfRangeException e)
+		{
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+		}
+		catch (Exception e)
+		{
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+		}
 	}
 }

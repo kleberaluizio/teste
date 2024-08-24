@@ -1,5 +1,7 @@
 package com.gesplan.calculadoradeemprestimo.model;
 
+import com.gesplan.calculadoradeemprestimo.model.dto.LoanFinancialSummaryDTO;
+import com.gesplan.calculadoradeemprestimo.model.dto.LoanInfoDTO;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 
@@ -16,163 +18,126 @@ public class LoanFinancialSummary
 	private double accumulated;
 	private double paid;
 
-	public LoanFinancialSummary(){}
-
-	public LoanFinancialSummary(LoanFinancialSummary previousSummary, LoanConstants loanConstants, int installment)
+	private LoanFinancialSummary()
 	{
-		setConsolidated(installment, loanConstants.getTotalInstallments());
-	}
-	public String getCompetenceDate()
-	{
-		return competenceDate;
 	}
 
-	public void setCompetenceDate(LocalDate competenceDate)
+	public LoanFinancialSummary(LoanInfoDTO loanInputInfo)
+	{
+		/* The order of the following lines should not be changed */
+		this.setCompetenceDate(loanInputInfo.getInitialDate());
+		this.consolidated = "";
+		this.provision = 0.0;
+		this.paid = 0.0;
+		this.accumulated = 0.0;
+		this.amortization = 0.0;
+		this.setTotalPayment();
+		this.loanAmount = loanInputInfo.getLoanAmount();
+		this.balance = loanInputInfo.getLoanAmount();
+		this.setOutstandingAmount();
+	}
+
+	public LoanFinancialSummary(LoanFinancialSummary previousSummary,
+		LoanConstants loanConstants, int installmentNumber, LocalDate competenceDate)
+	{
+		/* The order of the following lines should not be changed */
+		this.setCompetenceDate(competenceDate);
+		this.setConsolidated(installmentNumber, loanConstants.getTotalInstallments());
+		this.setProvision(previousSummary, loanConstants);
+		this.setPaid(previousSummary);
+		this.setAccumulated(previousSummary);
+		this.setAmortization(loanConstants);
+		this.setTotalPayment();
+		this.setBalance(previousSummary);
+		this.setOutstandingAmount();
+		this.loanAmount = 0.0;
+	}
+
+
+	private void setCompetenceDate(LocalDate competenceDate)
 	{
 		this.competenceDate = competenceDate.toString();
 	}
 
-	public double getLoanAmount()
+	private void setConsolidated(int installment, int TotalInstallment)
 	{
-		return this.loanAmount;
-	}
-
-	public void setLoanAmount(double loanAmount)
-	{
-		this.loanAmount = loanAmount;
-	}
-
-	public double getOutstandingAmount()
-	{
-		return outstandingAmount;
-	}
-
-	public void setOutstandingAmount(double outstandingAmount)
-	{
-		this.outstandingAmount = outstandingAmount;
-	}
-
-	public String getConsolidated()
-	{
-		return consolidated;
-	}
-
-	public void setConsolidated(String consolidated)
-	{
-		this.consolidated = consolidated;
-	}
-
-	public double getTotalPayment()
-	{
-		return totalPayment;
-	}
-
-	public void setTotalPayment(double totalPayment)
-	{
-		this.totalPayment = totalPayment;
-	}
-
-	public double getAmortization()
-	{
-		return amortization;
-	}
-
-	public void setAmortization(double amortization)
-	{
-		this.amortization = amortization;
-	}
-
-	public double getBalance()
-	{
-		return balance;
-	}
-
-	public void setBalance(double balance)
-	{
-		this.balance = balance;
-	}
-
-	public double getProvision()
-	{
-		return provision;
-	}
-
-	public void setProvision(double provision)
-	{
-		this.provision = provision;
-	}
-
-	public double getAccumulated()
-	{
-		return accumulated;
-	}
-
-	public void setAccumulated(double accumulated)
-	{
-		this.accumulated = accumulated;
-	}
-
-	public double getPaid()
-	{
-		return paid;
-	}
-
-	public void setPaid(double paid)
-	{
-		this.paid = paid;
-	}
-
-	private void setConsolidated(int installment, int TotalInstallment )
-	{
-		this.consolidated = String.format("%d/%d", installment, TotalInstallment);
+		this.consolidated = installment == 0 ? "" : (installment + "/" + TotalInstallment);
 	}
 
 	private void setProvision(LoanFinancialSummary previous, LoanConstants constants)
 	{
 		double adjustedInterestRate = constants.getInterestRate() + 1;
-		double timeFactor = getDaysBetweenSummaries(previous) / constants.getTotalInstallments();
+		double timeFactor = getDaysBetweenSummaries(previous) / LoanConstants.BASE_DAYS;
 		double totalPreviousBalance = previous.getBalance() + previous.getAccumulated();
 
 		this.provision = ((Math.pow(adjustedInterestRate, timeFactor)) - 1) * totalPreviousBalance;
 	}
 
-	private void setPaid(LoanFinancialSummary previousSummary)
+	private double getDaysBetweenSummaries(LoanFinancialSummary previous)
 	{
-		if (this.getConsolidated().isBlank())
-		{
-			this.paid = 0;
-		}
-
-		this.paid =  previousSummary.getAccumulated() + this.getProvision();
+		LocalDate previousDate = LocalDate.parse(previous.getCompetenceDate());
+		LocalDate actualDate = LocalDate.parse(this.competenceDate);
+		return ChronoUnit.DAYS.between(previousDate, actualDate);
 	}
 
-	private void setAccumulated(LoanFinancialSummary previousSummary)
+	private void setPaid(LoanFinancialSummary previous)
 	{
-		this.accumulated = previousSummary.getAccumulated() + this.getProvision() - this.getPaid();
+		this.paid = this.consolidated.isBlank() ? 0 : (previous.getAccumulated() + this.provision);
 	}
-	
-	private double getDaysBetweenSummaries(LoanFinancialSummary previousSummary)
+
+	private void setAccumulated(LoanFinancialSummary previous)
 	{
-		LocalDate previous = LocalDate.parse(previousSummary.getCompetenceDate());
-		LocalDate actual = LocalDate.parse(this.competenceDate);
-		return ChronoUnit.MONTHS.between(previous, actual);
+		this.accumulated = previous.getAccumulated() + this.provision - this.paid;
+	}
+
+	private void setAmortization(LoanConstants constants)
+	{
+		this.amortization = this.consolidated.isBlank() ? 0 : constants.getAmortizationValue();
+	}
+
+	private void setTotalPayment()
+	{
+		this.totalPayment = this.consolidated.isBlank() ? 0 : (this.amortization + this.paid);
+	}
+
+	private void setBalance(LoanFinancialSummary previous)
+	{
+		this.balance = previous.getBalance() - this.amortization;
 	}
 
 	private void setOutstandingAmount()
 	{
-		this.outstandingAmount = this.getBalance() + this.getAccumulated();
+		this.outstandingAmount = this.balance + this.accumulated;
 	}
 
-	public void setTotalPayment()
+	private String getCompetenceDate()
 	{
-		this.totalPayment = this.amortization + this.paid;
+		return competenceDate;
 	}
 
-	private void setBalance(LoanFinancialSummary previousSummary)
+	private double getBalance()
 	{
-		this.balance = previousSummary.getBalance() - this.getAmortization();
+		return balance;
 	}
 
+	private double getAccumulated()
+	{
+		return accumulated;
+	}
 
-
+	public LoanFinancialSummaryDTO convertToDTO()
+	{
+		return new LoanFinancialSummaryDTO(
+			this.competenceDate,
+			this.loanAmount,
+			this.outstandingAmount,
+			this.consolidated,
+			this.totalPayment,
+			this.amortization,
+			this.balance,
+			this.provision,
+			this.accumulated,
+			this.paid
+		);
+	}
 }
