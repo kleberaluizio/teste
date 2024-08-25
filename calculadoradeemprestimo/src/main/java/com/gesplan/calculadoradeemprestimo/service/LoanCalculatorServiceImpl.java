@@ -38,10 +38,7 @@ public class LoanCalculatorServiceImpl implements LoanCalculatorService
 			createPrePaymentsLastDayOfMonthRecords(financialSummary);
 		}
 
-		if (loanConstants.getTotalInstallments() > 0)
-		{
-			createRemainingRecords(financialSummary);
-		}
+		createRemainingRecords(financialSummary);
 	}
 
 	private void createFirstRecord(List<LoanFinancialRecord> financialSummary)
@@ -57,7 +54,7 @@ public class LoanCalculatorServiceImpl implements LoanCalculatorService
 		while (loanInfo.getFirstPaymentDate().isAfter(lastDayOfMonth))
 		{
 			addNoInstallmentRecord(financialSummary,lastDayOfMonth);
-			lastDayOfMonth = lastDayOfMonth.plusMonths(1);
+			lastDayOfMonth = getLastDayOfMonth(lastDayOfMonth.plusMonths(1));
 		}
 	}
 
@@ -76,7 +73,7 @@ public class LoanCalculatorServiceImpl implements LoanCalculatorService
 				addNoInstallmentRecord(financialSummary, lastDayOfMonth);
 			}
 
-			paymentDate = paymentDate.plusMonths(1);
+			paymentDate = getNextPaymentDate(paymentDate);
 			installment++;
 		}
 
@@ -97,6 +94,24 @@ public class LoanCalculatorServiceImpl implements LoanCalculatorService
 		financialSummary.add(
 			new LoanFinancialRecord(financialSummary.getLast(), loanConstants, 0, date)
 		);
+	}
+
+	private LocalDate getNextPaymentDate(LocalDate paymentDate)
+	{
+		int FEBRUARY = 2;
+		int firstPaymentDay = loanInfo.getFirstPaymentDate().getDayOfMonth();
+
+		if (firstPaymentDay == 31)
+		{
+			return getLastDayOfMonth(paymentDate.plusMonths(1));
+		}
+
+		if (firstPaymentDay == 30 && paymentDate.getMonthValue() == FEBRUARY)
+		{
+			return paymentDate.plusMonths(1).plusDays(1);
+		}
+
+		return paymentDate.plusMonths(1);
 	}
 
 	private int getMonthsUntilPaymentStart(LoanInfoDTO dto)

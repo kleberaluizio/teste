@@ -71,18 +71,18 @@ class LoanConstantsTest
 			"The total number of installments should be 121");
 	}
 
-	@DisplayName("Should Return Correct number of Installments When FinalDateDay and FirstPaymentDateDay are equal")
+	@DisplayName("Should Return Correct number of Installments When FinalDateDay and FirstPaymentDateDayOfMonth are equal")
 	@Test
-	public void shouldReturnCorrectTotalInstallmentsWhenFinalDateAndFirstPaymentAreEqual()
+	public void shouldReturnCorrectTotalInstallmentsWhenFinalDateAndFirstPaymentDayOfMonthAreEqual()
 	{
 		// Arrange
 		LoanInfoDTO loanInfoDTO = createGenericInfoDTO();
 		loanInfoDTO.setInitialDate("2024-01-01");
 		loanInfoDTO.setFinalDate("2034-01-16");
-		loanInfoDTO.setFirstPaymentDate("2034-02-16");
+		loanInfoDTO.setFirstPaymentDate("2033-12-16");
 
 		LoanConstants constants = new LoanConstants(loanInfoDTO);
-		int EXPECTED_INSTALLMENTS = 1;
+		int EXPECTED_INSTALLMENTS = 2;
 
 		//Act
 		int ACTUAL_INSTALLMENTS = constants.getTotalInstallments();
