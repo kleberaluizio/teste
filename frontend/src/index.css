@@ -1,6 +1,6 @@
 .table .thead {
     color: white;
-    background-color: #1758a1;
+    background-color: #03396c;
     text-align: center;
 }
 
@@ -11,4 +11,24 @@
 .table .record{
     text-align: right;
     padding-right: 30px;
+}
+
+.button-container{
+    display: flex;
+}
+
+
+.btn-primary{
+    align-self: end;
+    background-color: 	#005b96;
+}
+
+.error-container{
+    color: red;
+    font-size:small;
+    font-weight: bold;
+}
+
+.cell-error {
+    border: 1px solid red;
 }

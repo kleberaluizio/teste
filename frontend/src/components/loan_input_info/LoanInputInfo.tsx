@@ -1,5 +1,6 @@
 import React from 'react'
 import styled from 'styled-components';
+import toast, { Toaster } from 'react-hot-toast';
 import CurrencyInput from 'react-currency-input-field';
 import { NumericFormat } from 'react-number-format';
 import { useForm } from 'react-hook-form';
@@ -10,33 +11,75 @@ import { useFinancialSummary } from '../../context/FinancialSummaryContext';
 
 const loanService = new LoanService();
 
+
 const LoanInputInfo: React.FC = () => {
   const { setSummary } = useFinancialSummary();
-  const { register, handleSubmit, setValue, getValues, formState: { errors } } = useForm<LoanRequest>();
+  const { register, handleSubmit, setValue, getValues, setError, clearErrors,formState: { errors } } = useForm<LoanRequest>();
+
+  const validateFields = (data: LoanRequest) => {
+    
+    const requiredFields = ['initialDate', 'finalDate', 'firstPaymentDate','loanAmount', 'interestRate'];
+    requiredFields.forEach(field => {
+      if (!data[field]) {
+        setError(field as keyof LoanRequest, {
+          type: 'manual',
+          message: 'Este campo é obrigatório',
+        });
+      }
+    });
+    if (new Date(data.finalDate) <= new Date(data.initialDate)) {
+      setError('finalDate', { type: 'manual', message: 'Data final deve ser após a data inicial' });
+      toast.error('Data final deve ser após a data inicial');
+    }
+
+    if (new Date(data.firstPaymentDate) <= new Date(data.initialDate)) {
+      setError('firstPaymentDate', { type: 'manual', message: 'Data do primeiro pagamento deve ser após a data inicial' });
+      toast.error('Data do primeiro pagamento deve ser após a data inicial');
+    }
+  };
 
   const onSubmit = async (data: LoanRequest) => {
+    console.log("executei")
     try {
+      clearErrors();
+      validateFields(data);
+      
+      if (Object.keys(errors).length > 0) {
+        return;
+      }
       const result: LoanFinancialRecord[] = await loanService.getFinancialSummary(data);
       setSummary(result);
-      console.log('Financial Summary:', result);
     } catch (error) {
       console.error('Error:', error);
     }
+  };
+
+  const handleLoanAmountChange = (value: string | undefined) => {
+    setValue('loanAmount', value ? parseFloat(value) : 0)
+    clearErrors('loanAmount'); 
+  };
+
+  const handleInterestRateChange = (values) => {
+    setValue('interestRate', values.value ? parseFloat(values.value) : 0)
+    clearErrors('interestRate'); 
   };
 
   return (
     <FORM onSubmit={handleSubmit(onSubmit)}>
       <div className="form-group col-md-2 px-3">
         <label htmlFor="initialDate">Data Inicial</label>
-        <input type="date" className="form-control" id="initialDate" {...register('initialDate', { required: true })} />
+        <input type="date" className='form-control' id="initialDate" {...register('initialDate')} />
+        {errors.initialDate && <span className='error-container'>{errors.initialDate.message}</span>}
       </div>
       <div className="form-group col-md-2 px-3">
         <label htmlFor="finalDate">Data Final</label>
-        <input type="date" className="form-control" id="finalDate" {...register('finalDate', { required: true })} />
+        <input type="date" className="form-control" id="finalDate" {...register('finalDate')} />
+        {errors.finalDate && <span className='error-container'>{errors.finalDate.message}</span>}
       </div>
       <div className="form-group col-md-2 px-3">
         <label htmlFor="firstPaymentDate">Primeiro Pagamento</label>
-        <input type="date" className="form-control" id="firstPaymentDate" {...register('firstPaymentDate', { required: true })}/>
+        <input type="date" className="form-control" id="firstPaymentDate" {...register('firstPaymentDate')}/>
+        {errors.firstPaymentDate && <span className='error-container'>{errors.firstPaymentDate.message}</span>}
       </div>
       <div className="form-group col-md-2 px-3">
         <label htmlFor="loanAmount">Valor do Empréstimo</label>
@@ -49,8 +92,9 @@ const LoanInputInfo: React.FC = () => {
           decimalSeparator=","
           groupSeparator="."
           value={getValues('loanAmount')}
-          onValueChange={(value) => setValue('loanAmount', value ? parseFloat(value) : 0)}
+          onValueChange={handleLoanAmountChange}
         />
+        {errors.loanAmount && <span className='error-container'>Este campo é obrigatório</span>}
       </div>
       <div className="form-group col-md-2 px-3">
         <label htmlFor="interestRate">Taxa de Juros</label>
@@ -64,13 +108,16 @@ const LoanInputInfo: React.FC = () => {
           placeholder="Digite um valor"
           decimalSeparator={','}
           value={getValues('interestRate')}
-          onValueChange={(values) => setValue('interestRate', values.value ? parseFloat(values.value) : 0)}
+          onValueChange={handleInterestRateChange}
         />
+        {errors.interestRate && <span className='error-container'>Este campo é obrigatório</span>}
       </div>
-      <div className="form-group col-md-2 px-3">
-        <button type="submit" className="btn btn-primary form-control align-bottom ">Calcular</button>
+      <div className="form-group col-md-2 px-3 button-container">
+        <button type="submit" className="btn btn-primary form-control">Calcular</button>
       </div>
+      <Toaster position="top-right" reverseOrder={false} toastOptions={{duration: 2000}}/>
     </FORM>
+    
   )
 }
 
