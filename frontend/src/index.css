@@ -1,0 +1,14 @@
+.table .thead {
+    color: white;
+    background-color: #1758a1;
+    text-align: center;
+}
+
+.align-center {
+    text-align: center;
+}
+
+.table .record{
+    text-align: right;
+    padding-right: 30px;
+}
