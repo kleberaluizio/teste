@@ -26,7 +26,7 @@ public class LoanCalculatorController
 
 
 	@PostMapping("/financial-summaries")
-	public ResponseEntity<?> getCalculateResult(@RequestBody @Valid LoanInfoDTO loanInfoDTO)
+	public ResponseEntity<?> assembleFinancialSummary(@RequestBody @Valid LoanInfoDTO loanInfoDTO)
 	{
 		try
 		{
