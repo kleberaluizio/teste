@@ -1,4 +1,5 @@
 import React from 'react'
+import styled from 'styled-components';
 
 const SummaryHead = () => {
     return (
@@ -24,5 +25,6 @@ const SummaryHead = () => {
         </thead>
     )
 }
+
 
 export default SummaryHead

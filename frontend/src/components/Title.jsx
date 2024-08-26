@@ -6,6 +6,10 @@ const Header = styled.header`
     font-family: Arial;
     color: black;
     margin: 30px 0 20px 40px;
+
+    @media (max-width: 576px) {
+    font-size: 30px;
+    }
 `;
 
 const Title = () => {

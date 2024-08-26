@@ -18,9 +18,9 @@ const FinancialSummary: React.FC = () => {
 
   return (
     <SECTION className='table-responsive'>
-      <table className="table table-bordered table-sm" border="1">
+      <table className="table table-bordered table-sm" border={1}>
         <SummaryHead></SummaryHead>
-        <tbody>
+        <tbody className='table-body'>
           {summary.map((record: LoanFinancialRecord, index: number) => (
             <tr key={index}>
               <td className='align-center'>{formatDate(record.competenceDate)}</td>
@@ -43,6 +43,13 @@ const FinancialSummary: React.FC = () => {
 
 const SECTION = styled.div`
     margin: 0 45px 0 45px;
+    max-height: 400px;
+    overflow-y: auto;
+    
+    @media (max-width: 1200px) {
+    font-size: 13px;
+    max-height: 300px;
+    }
 `;
 
 export default FinancialSummary
