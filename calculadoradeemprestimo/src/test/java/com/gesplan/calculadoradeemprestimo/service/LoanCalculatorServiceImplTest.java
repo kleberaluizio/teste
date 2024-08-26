@@ -12,13 +12,26 @@ class LoanCalculatorServiceImplTest
 {
 	LoanCalculatorService loanCalculatorService = new LoanCalculatorServiceImpl();
 
-	@DisplayName("Should throws InitialDateAfterFinalDateException")
+	@DisplayName("Should throws InitialDateAfterFinalDateException when initialDate after finalDate")
 	@Test
-	public void shouldThrowsInitialDateAfterFinalDateException()
+	public void shouldThrowsInitialDateAfterFinalDateExceptionWhenInitialDateAfterFinalDate()
 	{
 		LoanInfoDTO loanInfoDTO = createGenericInfoDTO();
 		loanInfoDTO.setInitialDate("2024-08-30");
 		loanInfoDTO.setFinalDate("2024-08-24");
+
+		assertThrows(InitialDateAfterFinalDateException.class, () -> {
+			loanCalculatorService.getLoanFinancialSummary(loanInfoDTO);
+		});
+	}
+
+	@DisplayName("Should throws InitialDateAfterFinalDateException when initialDate equals finalDate")
+	@Test
+	public void shouldThrowsInitialDateAfterFinalDateExceptionWhenInitialDateEqualsFinalDate()
+	{
+		LoanInfoDTO loanInfoDTO = createGenericInfoDTO();
+		loanInfoDTO.setInitialDate("2024-01-30");
+		loanInfoDTO.setFinalDate("2024-01-30");
 
 		assertThrows(InitialDateAfterFinalDateException.class, () -> {
 			loanCalculatorService.getLoanFinancialSummary(loanInfoDTO);

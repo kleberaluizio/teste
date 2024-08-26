@@ -138,7 +138,8 @@ public class LoanCalculatorServiceImpl implements LoanCalculatorService
 
 	private void assertFinalDateAfterInitialDate(LoanInfoDTO dto)
 	{
-		if (dto.getInitialDate().isAfter(dto.getFinalDate()))
+		if (dto.getInitialDate().isAfter(dto.getFinalDate()) ||
+			dto.getInitialDate().isEqual(dto.getFinalDate()))
 		{
 			throw new InitialDateAfterFinalDateException();
 		}
@@ -146,8 +147,8 @@ public class LoanCalculatorServiceImpl implements LoanCalculatorService
 
 	private void assertFirstPaymentDateInRange(LoanInfoDTO dto)
 	{
-		if (dto.getFirstPaymentDate().isBefore(dto.getInitialDate()) || dto.getFirstPaymentDate()
-			.isAfter(dto.getFinalDate()))
+		if (!dto.getFirstPaymentDate().isAfter(dto.getInitialDate()) ||
+			!dto.getFirstPaymentDate().isBefore(dto.getFinalDate()) )
 		{
 			throw new FirstPaymentDateOutOfRangeException();
 		}
