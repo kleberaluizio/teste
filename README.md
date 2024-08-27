@@ -13,8 +13,11 @@ Este projeto é uma aplicação de gerenciamento e visualização de cronogramas
 - Acumulado: Total acumulado até a data.
 - Pago: Total pago até a data.
 
-**Preview**
+**Screenshot:**
+<img src="/preview/screenshot.PNG">
 
+**Demonstração:**
+<img src="/preview/simulacao.gif">
 
 ## Executando a Aplicação Localmente:
 
