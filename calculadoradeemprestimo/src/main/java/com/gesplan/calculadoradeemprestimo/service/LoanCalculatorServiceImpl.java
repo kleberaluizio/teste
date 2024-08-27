@@ -68,7 +68,7 @@ public class LoanCalculatorServiceImpl implements LoanCalculatorService
 			addInstallmentEntry(financialSummary, installment, paymentDate);
 
 			LocalDate lastDayOfMonth = getLastDayOfMonth(paymentDate);
-			if (lastDayOfMonth.isBefore(loanInfo.getFinalDate()))
+			if (lastDayOfMonth.isBefore(loanInfo.getFinalDate()) && !lastDayOfMonth.isEqual(paymentDate))
 			{
 				addNoInstallmentEntry(financialSummary, lastDayOfMonth);
 			}
@@ -77,7 +77,7 @@ public class LoanCalculatorServiceImpl implements LoanCalculatorService
 			installment++;
 		}
 
-		// Add the last installment record on the final date of the loan
+		// Add the last installment entry on the final date
 		addInstallmentEntry(financialSummary, installment, loanInfo.getFinalDate());
 	}
 
