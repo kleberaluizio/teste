@@ -61,14 +61,27 @@ const Summary = styled.section`
 `;
 
 const NoDataMessage = styled.div`
-  margin-top: 45px;
+  margin-top: 120px;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  text-align: center;
 
   h3 {
-    font-size: 20px;
+    font-size: 24px;
+
+    @media (max-width: 1200px) {
+      font-size: 20px;
+    }
+    
+    @media (max-width: 992px) {
+      font-size: 16px;
+    }
+
+    @media (max-width: 768px) {
+      font-size: 14px;
+    }
   }
 `;
 

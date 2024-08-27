@@ -9,8 +9,10 @@ import { LoanScheduleEntry } from '../../types/LoanScheduleEntry';
 import { useFinancialSummary } from '../../context/FinancialSummaryContext';
 
 const loanService = new LoanService();
-let hasError: Boolean = false;
+
 let shouldNotProceedSubmit: Boolean = false;
+let hasError: Boolean = false;
+
 
 const LoanInputInfo: React.FC = () => {
   const { setSummary } = useFinancialSummary();
@@ -18,9 +20,9 @@ const LoanInputInfo: React.FC = () => {
 
   
   const validateFields = (data: LoanRequest) => {
-    
     const requiredFields = ['initialDate', 'finalDate', 'firstPaymentDate', 'loanAmount', 'interestRate'];
-    
+    hasError = false;
+
     requiredFields.forEach(field => {
       if (!data[field]) {
         hasError = true;
@@ -66,7 +68,7 @@ const LoanInputInfo: React.FC = () => {
   };
 
   return (
-    <FORM onSubmit={handleSubmit(onSubmit)} className="row">
+    <LoanForm onSubmit={handleSubmit(onSubmit)} className="row">
       <div className="form-group col-xl-2 col-6 px-3">
         <label htmlFor="initialDate">Data Inicial</label>
         <input type="date" className='form-control' id="initialDate" {...register('initialDate')} />
@@ -123,12 +125,12 @@ const LoanInputInfo: React.FC = () => {
             border: '2px solid black',
           },
         }} />
-    </FORM>
+    </LoanForm>
     
   )
 }
 
-const FORM = styled.form`
+const LoanForm = styled.form`
   display: flex;
   flex-direction: row;
   margin: 0 30px 30px 30px;
