@@ -20,7 +20,7 @@ public class LoanCalculatorServiceImpl implements LoanCalculatorService
 	@Override
 	public List<LoanScheduleEntry> getLoanFinancialSummary(LoanInfoDTO loanInfoDTO)
 	{
-		assertValidDates(loanInfoDTO);
+		assertValidData(loanInfoDTO);
 		setAttributes(loanInfoDTO);
 
 		List<LoanScheduleEntry> financialSummary = new ArrayList<>();
@@ -130,10 +130,11 @@ public class LoanCalculatorServiceImpl implements LoanCalculatorService
 		loanInfo = loanInfoDTO;
 	}
 
-	private void assertValidDates(LoanInfoDTO dto)
+	private void assertValidData(LoanInfoDTO dto)
 	{
 		assertFinalDateAfterInitialDate(dto);
 		assertFirstPaymentDateInRange(dto);
+		assertLoanAmountAndInterestRateArePositives(dto);
 	}
 
 	private void assertFinalDateAfterInitialDate(LoanInfoDTO dto)
@@ -151,6 +152,16 @@ public class LoanCalculatorServiceImpl implements LoanCalculatorService
 			!dto.getFirstPaymentDate().isBefore(dto.getFinalDate()) )
 		{
 			throw new FirstPaymentDateOutOfRangeException();
+		}
+	}
+
+	private void assertLoanAmountAndInterestRateArePositives(LoanInfoDTO dto)
+	{
+		if (dto.getLoanAmount() <= 0) {
+			throw new IllegalArgumentException("Loan amount should be positive!");
+		}
+		if (dto.getInterestRate() <= 0) {
+			throw new IllegalArgumentException("Interest rate should be positive!");
 		}
 	}
 }

@@ -92,6 +92,7 @@ const LoanInputInfo: React.FC = () => {
           placeholder="Digite um valor"
           thousandSeparator="."
           decimalSeparator={','}
+          allowNegative={false}
           value={getValues('loanAmount')}
           onValueChange={(values) => setValue('loanAmount', values.value ? parseFloat(values.value) : 0)}
         />
@@ -107,6 +108,7 @@ const LoanInputInfo: React.FC = () => {
           fixedDecimalScale={true}
           placeholder="Digite um valor"
           decimalSeparator={','}
+          allowNegative={false}
           value={getValues('interestRate')}
           onValueChange={(values) => setValue('interestRate', values.value ? parseFloat(values.value) : 0)}
         />

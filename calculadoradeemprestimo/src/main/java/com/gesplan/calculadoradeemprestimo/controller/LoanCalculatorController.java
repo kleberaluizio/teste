@@ -39,7 +39,8 @@ public class LoanCalculatorController
 					.collect(Collectors.toList())
 			);
 		}
-		catch (InitialDateAfterFinalDateException | FirstPaymentDateOutOfRangeException e)
+		catch (InitialDateAfterFinalDateException | FirstPaymentDateOutOfRangeException |
+		       IllegalArgumentException e)
 		{
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
 		}
