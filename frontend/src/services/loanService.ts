@@ -1,13 +1,13 @@
-import { LoanFinancialRecord } from "../types/loanFinancialRecord";
+import { LoanScheduleEntry } from "../types/LoanScheduleEntry";
 import { LoanRequest } from "../types/loanRequest";
 
 const API_URL = 'http://localhost:8080/loan';
 
 export class LoanService {
 
-  public async getFinancialSummary(request: LoanRequest): Promise<LoanFinancialRecord[]> {
+  public async getFinancialSummary(request: LoanRequest): Promise<LoanScheduleEntry[]> {
     try {
-      const response = await fetch(`${API_URL}/financial-summaries`, {
+      const response = await fetch(`${API_URL}/financial-summary`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -15,12 +15,12 @@ export class LoanService {
         body: JSON.stringify(request)
       });
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        throw new Error(`HTTP error!`);
       }
-      const data: LoanFinancialRecord[] = await response.json();
+      const data: LoanScheduleEntry[] = await response.json();
       return data;
     } catch (error) {
-      console.error('Error fetching loan records:', error);
+      console.error('Error fetching financial summary:', error);
       throw error;
     }
   }

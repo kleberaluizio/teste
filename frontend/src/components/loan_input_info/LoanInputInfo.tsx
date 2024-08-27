@@ -5,43 +5,38 @@ import { NumericFormat } from 'react-number-format';
 import { useForm } from 'react-hook-form';
 import { LoanService } from '../../services/loanService';
 import { LoanRequest } from '../../types/loanRequest';
-import { LoanFinancialRecord } from '../../types/loanFinancialRecord';
+import { LoanScheduleEntry } from '../../types/LoanScheduleEntry';
 import { useFinancialSummary } from '../../context/FinancialSummaryContext';
 
 const loanService = new LoanService();
-
+let hasError: Boolean = false;
+let shouldNotProceedSubmit: Boolean = false;
 
 const LoanInputInfo: React.FC = () => {
   const { setSummary } = useFinancialSummary();
-  const { register, handleSubmit, setValue, getValues, setError, clearErrors,formState: { errors } } = useForm<LoanRequest>();
+  const { register, handleSubmit, setValue, getValues,formState: { errors } } = useForm<LoanRequest>();
 
-  var shouldNotProceedSubmit: Boolean = false;
-
+  
   const validateFields = (data: LoanRequest) => {
     
-    const requiredFields = ['initialDate', 'finalDate', 'firstPaymentDate','loanAmount', 'interestRate'];
-    let hasError :Boolean = false;
+    const requiredFields = ['initialDate', 'finalDate', 'firstPaymentDate', 'loanAmount', 'interestRate'];
+    
     requiredFields.forEach(field => {
       if (!data[field]) {
-        shouldNotProceedSubmit = true;
         hasError = true;
       }
     });
 
     if (hasError) {
-      toast.error('Todos os campos são obrigatórios!')
+      triggerToast('Todos os campos são obrigatórios!');
     }
 
     if (new Date(data.finalDate) <= new Date(data.initialDate)) {
-      toast.error('Data final deve ser após a data inicial');
-      hasError = true;
-      shouldNotProceedSubmit = true;
+      triggerToast('Data final deve ser após a data inicial');
     }
 
     if (new Date(data.initialDate) >= new Date(data.firstPaymentDate) || new Date(data.finalDate) <= new Date(data.firstPaymentDate)) {
-      toast.error('Primeiro pagamento deve ser após a data inicial e antes da data final');
-      hasError = true;
-      shouldNotProceedSubmit = true;
+      triggerToast('Primeiro pagamento deve ser após a data inicial e antes da data final');
     }
    
     if (!hasError) {
@@ -49,8 +44,13 @@ const LoanInputInfo: React.FC = () => {
     }
   };
 
+  const triggerToast = (message) =>{
+    toast.error(message);
+    hasError = true;
+    shouldNotProceedSubmit = true;
+  }
+
   const onSubmit = async (data: LoanRequest) => {
-    console.log("executei")
     try {
       validateFields(data);
       
@@ -58,10 +58,10 @@ const LoanInputInfo: React.FC = () => {
         setSummary([])
         return;
       }
-      const result: LoanFinancialRecord[] = await loanService.getFinancialSummary(data);
+      const result: LoanScheduleEntry[] = await loanService.getFinancialSummary(data);
       setSummary(result);
     } catch (error) {
-      console.error('Error:', error);
+      toast.error('Ops! Operação indisponível temporariamente.');
     }
   };
 
@@ -119,6 +119,7 @@ const LoanInputInfo: React.FC = () => {
           duration: 4000, 
           style: {
             color: 'black',
+            margin:'0 45px 0 0',
             border: '2px solid black',
           },
         }} />

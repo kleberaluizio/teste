@@ -1,15 +1,15 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { LoanFinancialRecord } from '../types/loanFinancialRecord';
+import { LoanScheduleEntry } from '../types/LoanScheduleEntry';
 
 interface FinancialSummaryContextType {
-  summary: LoanFinancialRecord[];
-  setSummary: React.Dispatch<React.SetStateAction<LoanFinancialRecord[]>>;
+  summary: LoanScheduleEntry[];
+  setSummary: React.Dispatch<React.SetStateAction<LoanScheduleEntry[]>>;
 }
 
 const FinancialSummaryContext = createContext<FinancialSummaryContextType | undefined>(undefined);
 
 export const FinancialSummaryProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [summary, setSummary] = useState<LoanFinancialRecord[]>([]);
+  const [summary, setSummary] = useState<LoanScheduleEntry[]>([]);
   
   return (
     <FinancialSummaryContext.Provider value={{ summary, setSummary }}>
@@ -21,7 +21,7 @@ export const FinancialSummaryProvider: React.FC<{ children: ReactNode }> = ({ ch
 export const useFinancialSummary = (): FinancialSummaryContextType => {
   const context = useContext(FinancialSummaryContext);
   if (!context) {
-    throw new Error('useFinancialSummary must be used within a FinancialSummaryProvider');
+    throw new Error('LoanInputInfo and FinancialSummary must be within FinancialSummaryProvider');
   }
   return context;
 };

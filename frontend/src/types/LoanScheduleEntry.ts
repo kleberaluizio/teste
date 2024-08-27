@@ -1,4 +1,4 @@
-export interface LoanFinancialRecord {
+export interface LoanScheduleEntry {
     competenceDate: string;     // Data de competência
     loanAmount: number;         // Valor do empréstimo
     outstandingAmount: number;  // Valor pendente

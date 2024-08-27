@@ -2,7 +2,7 @@ package com.gesplan.calculadoradeemprestimo.controller;
 
 import com.gesplan.calculadoradeemprestimo.exception.InitialDateAfterFinalDateException;
 import com.gesplan.calculadoradeemprestimo.exception.FirstPaymentDateOutOfRangeException;
-import com.gesplan.calculadoradeemprestimo.model.LoanFinancialRecord;
+import com.gesplan.calculadoradeemprestimo.model.LoanScheduleEntry;
 import com.gesplan.calculadoradeemprestimo.model.dto.LoanInfoDTO;
 import com.gesplan.calculadoradeemprestimo.service.LoanCalculatorService;
 import jakarta.validation.Valid;
@@ -25,17 +25,17 @@ public class LoanCalculatorController
 	}
 
 
-	@PostMapping("/financial-summaries")
+	@PostMapping("/financial-summary")
 	public ResponseEntity<?> assembleFinancialSummary(@RequestBody @Valid LoanInfoDTO loanInfoDTO)
 	{
 		try
 		{
-			List<LoanFinancialRecord> financialSummaries = service.getLoanFinancialSummary(loanInfoDTO);
+			List<LoanScheduleEntry> financialSummaries = service.getLoanFinancialSummary(loanInfoDTO);
 
 			return ResponseEntity.status(HttpStatus.OK).body(
 				financialSummaries
 					.stream()
-					.map(LoanFinancialRecord::convertToDTO)
+					.map(LoanScheduleEntry::convertToDTO)
 					.collect(Collectors.toList())
 			);
 		}

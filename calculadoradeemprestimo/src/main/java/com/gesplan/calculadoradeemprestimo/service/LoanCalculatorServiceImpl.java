@@ -3,7 +3,7 @@ package com.gesplan.calculadoradeemprestimo.service;
 import com.gesplan.calculadoradeemprestimo.exception.InitialDateAfterFinalDateException;
 import com.gesplan.calculadoradeemprestimo.exception.FirstPaymentDateOutOfRangeException;
 import com.gesplan.calculadoradeemprestimo.model.LoanConstants;
-import com.gesplan.calculadoradeemprestimo.model.LoanFinancialRecord;
+import com.gesplan.calculadoradeemprestimo.model.LoanScheduleEntry;
 import com.gesplan.calculadoradeemprestimo.model.dto.LoanInfoDTO;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
@@ -18,59 +18,59 @@ public class LoanCalculatorServiceImpl implements LoanCalculatorService
 	private LoanInfoDTO loanInfo;
 
 	@Override
-	public List<LoanFinancialRecord> getLoanFinancialSummary(LoanInfoDTO loanInfoDTO)
+	public List<LoanScheduleEntry> getLoanFinancialSummary(LoanInfoDTO loanInfoDTO)
 	{
 		assertValidDates(loanInfoDTO);
 		setAttributes(loanInfoDTO);
 
-		List<LoanFinancialRecord> financialSummary = new ArrayList<>();
+		List<LoanScheduleEntry> financialSummary = new ArrayList<>();
 		assembleFinancialSummary(financialSummary);
 
 		return financialSummary;
 	}
 
-	private void assembleFinancialSummary(List<LoanFinancialRecord> financialSummary)
+	private void assembleFinancialSummary(List<LoanScheduleEntry> financialSummary)
 	{
-		createFirstRecord(financialSummary);
+		createFirstEntry(financialSummary);
 
 		if (getMonthsUntilPaymentStart(loanInfo) > 0)
 		{
-			createPrePaymentsLastDayOfMonthRecords(financialSummary);
+			createPrePaymentsLastDayOfMonthEntries(financialSummary);
 		}
 
-		createRemainingRecords(financialSummary);
+		createRemainingEntries(financialSummary);
 	}
 
-	private void createFirstRecord(List<LoanFinancialRecord> financialSummary)
+	private void createFirstEntry(List<LoanScheduleEntry> financialSummary)
 	{
-		LoanFinancialRecord firstRecord = new LoanFinancialRecord(loanInfo);
+		LoanScheduleEntry firstRecord = new LoanScheduleEntry(loanInfo);
 		financialSummary.add(firstRecord);
 	}
 
-	private void createPrePaymentsLastDayOfMonthRecords(List<LoanFinancialRecord> financialSummary)
+	private void createPrePaymentsLastDayOfMonthEntries(List<LoanScheduleEntry> financialSummary)
 	{
 		LocalDate lastDayOfMonth = getLastDayOfMonth(loanInfo.getInitialDate());
 
 		while (loanInfo.getFirstPaymentDate().isAfter(lastDayOfMonth))
 		{
-			addNoInstallmentRecord(financialSummary,lastDayOfMonth);
+			addNoInstallmentEntry(financialSummary,lastDayOfMonth);
 			lastDayOfMonth = getLastDayOfMonth(lastDayOfMonth.plusMonths(1));
 		}
 	}
 
-	private void createRemainingRecords(List<LoanFinancialRecord> financialSummary)
+	private void createRemainingEntries(List<LoanScheduleEntry> financialSummary)
 	{
 		LocalDate paymentDate = loanInfo.getFirstPaymentDate();
 		int installment = 1;
 
 		while (loanInfo.getFinalDate().isAfter(paymentDate))
 		{
-			addInstallmentRecord(financialSummary, installment, paymentDate);
+			addInstallmentEntry(financialSummary, installment, paymentDate);
 
 			LocalDate lastDayOfMonth = getLastDayOfMonth(paymentDate);
-			if (paymentDate.isBefore(lastDayOfMonth))
+			if (lastDayOfMonth.isBefore(loanInfo.getFinalDate()))
 			{
-				addNoInstallmentRecord(financialSummary, lastDayOfMonth);
+				addNoInstallmentEntry(financialSummary, lastDayOfMonth);
 			}
 
 			paymentDate = getNextPaymentDate(paymentDate);
@@ -78,21 +78,21 @@ public class LoanCalculatorServiceImpl implements LoanCalculatorService
 		}
 
 		// Add the last installment record on the final date of the loan
-		addInstallmentRecord(financialSummary, installment, loanInfo.getFinalDate());
+		addInstallmentEntry(financialSummary, installment, loanInfo.getFinalDate());
 	}
 
-	private void addInstallmentRecord(List<LoanFinancialRecord> financialSummary, int installment,
+	private void addInstallmentEntry(List<LoanScheduleEntry> financialSummary, int installment,
 		LocalDate date)
 	{
 		financialSummary.add(
-			new LoanFinancialRecord(financialSummary.getLast(), loanConstants, installment, date)
+			new LoanScheduleEntry(financialSummary.getLast(), loanConstants, installment, date)
 		);
 	}
 
-	private void addNoInstallmentRecord(List<LoanFinancialRecord> financialSummary, LocalDate date)
+	private void addNoInstallmentEntry(List<LoanScheduleEntry> financialSummary, LocalDate date)
 	{
 		financialSummary.add(
-			new LoanFinancialRecord(financialSummary.getLast(), loanConstants, 0, date)
+			new LoanScheduleEntry(financialSummary.getLast(), loanConstants, 0, date)
 		);
 	}
 
