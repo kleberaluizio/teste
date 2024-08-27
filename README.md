@@ -90,5 +90,5 @@ Retorna um cronograma/resumo de pagamentos e datas relavantes.
   * 200 (OK): Sucesso. Retorna o cronograma/resumo de pagamentos e datas relavantes.
   * 400 (Bad Request): Erro de validação. Datas inválidas ou payload incorreto.
   * 500 (Internal Server Error): Falha interna no servidor.
-	* Retorna status 200 (OK) em caso de sucesso, 400 (Bad Request) para datas inválidas ou 500 (Internal Server Error) em falha.
+
 
