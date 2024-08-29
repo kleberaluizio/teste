@@ -6,71 +6,44 @@ import com.gesplan.calculadoradeemprestimo.exception.FirstPaymentDateOutOfRangeE
 import com.gesplan.calculadoradeemprestimo.exception.InitialDateAfterFinalDateException;
 import com.gesplan.calculadoradeemprestimo.model.dto.LoanInfoDTO;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 class LoanCalculatorServiceImplTest
 {
+	static LoanInfoDTO loanInfoDTO = new LoanInfoDTO();
 	LoanCalculatorService loanCalculatorService = new LoanCalculatorServiceImpl();
 
-	@DisplayName("Should throws InitialDateAfterFinalDateException when initialDate after finalDate")
-	@Test
-	public void shouldThrowsInitialDateAfterFinalDateExceptionWhenInitialDateAfterFinalDate()
+	@DisplayName("Should throws InitialDateAfterFinalDateException")
+	@ParameterizedTest(name = "{2}")
+	@CsvSource({
+		"2024-08-30, 2024-08-24, ... when initialDate after finalDate",
+		"2024-01-30, 2024-01-30, ... when initialDate and finalDate are equals"})
+	public void shouldThrowsInitialDateAfterFinalDateException(String initialDate, String finalDate, String displayName)
 	{
-		LoanInfoDTO loanInfoDTO = createGenericInfoDTO();
-		loanInfoDTO.setInitialDate("2024-08-30");
-		loanInfoDTO.setFinalDate("2024-08-24");
+		loanInfoDTO.setInitialDate(initialDate);
+		loanInfoDTO.setFinalDate(finalDate);
 
 		assertThrows(InitialDateAfterFinalDateException.class, () -> {
 			loanCalculatorService.getLoanFinancialSummary(loanInfoDTO);
 		});
 	}
 
-	@DisplayName("Should throws InitialDateAfterFinalDateException when initialDate equals finalDate")
-	@Test
-	public void shouldThrowsInitialDateAfterFinalDateExceptionWhenInitialDateEqualsFinalDate()
+	@DisplayName("Should throws FirstPaymentDateOutOfRangeException")
+	@ParameterizedTest(name = "{3}")
+	@CsvSource({
+		"2024-08-01, 2034-08-01, 2034-10-15, ... when first payment after final date",
+		"2024-08-01, 2034-08-01, 2024-05-15, ... when initialDate and finalDate are equals"})
+	public void shouldThrowsFirstPaymentDateOutOfRangeException(String initialDate, String finalDate,
+		String paymentDate, String displayName)
 	{
-		LoanInfoDTO loanInfoDTO = createGenericInfoDTO();
-		loanInfoDTO.setInitialDate("2024-01-30");
-		loanInfoDTO.setFinalDate("2024-01-30");
-
-		assertThrows(InitialDateAfterFinalDateException.class, () -> {
-			loanCalculatorService.getLoanFinancialSummary(loanInfoDTO);
-		});
-	}
-
-	@DisplayName("Should throws FirstPaymentDateOutOfRangeException When First Payment After Final Date")
-	@Test
-	public void shouldThrowsFirstPaymentDateOutOfRangeExceptionWhenFirstPaymentAfterFinalDate()
-	{
-		LoanInfoDTO loanInfoDTO = createGenericInfoDTO();
-		loanInfoDTO.setInitialDate("2024-08-01");
-		loanInfoDTO.setFinalDate("2034-08-01");
-		loanInfoDTO.setFirstPaymentDate("2034-10-15");
+		loanInfoDTO.setInitialDate(initialDate);
+		loanInfoDTO.setFinalDate(finalDate);
+		loanInfoDTO.setFirstPaymentDate(paymentDate);
 
 		assertThrows(FirstPaymentDateOutOfRangeException.class, () -> {
 			loanCalculatorService.getLoanFinancialSummary(loanInfoDTO);
 		});
 	}
 
-	@DisplayName("Should throws FirstPaymentDateOutOfRangeException When First Payment Before Initial Date")
-	@Test
-	public void shouldThrowFirstPaymentDateOutOfRangeExceptionWhenFirstPaymentBeforeInitialDate()
-	{
-		LoanInfoDTO loanInfoDTO = createGenericInfoDTO();
-		loanInfoDTO.setInitialDate("2024-08-01");
-		loanInfoDTO.setFinalDate("2034-08-01");
-		loanInfoDTO.setFirstPaymentDate("2024-05-15");
-
-		assertThrows(FirstPaymentDateOutOfRangeException.class, () -> {
-			loanCalculatorService.getLoanFinancialSummary(loanInfoDTO);
-		});
-	}
-
-	private LoanInfoDTO createGenericInfoDTO()
-	{
-		LoanInfoDTO dto = new LoanInfoDTO();
-		dto.setInterestRate(7);
-		dto.setLoanAmount(1000000.0);
-		return dto;
-	}
 }
