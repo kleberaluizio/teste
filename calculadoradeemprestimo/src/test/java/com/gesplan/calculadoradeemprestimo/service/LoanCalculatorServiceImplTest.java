@@ -24,9 +24,7 @@ class LoanCalculatorServiceImplTest
 		loanInfoDTO.setInitialDate(initialDate);
 		loanInfoDTO.setFinalDate(finalDate);
 
-		assertThrows(InitialDateAfterFinalDateException.class, () -> {
-			loanCalculatorService.getLoanFinancialSummary(loanInfoDTO);
-		});
+		assertThrows(InitialDateAfterFinalDateException.class, () -> loanCalculatorService.getLoanFinancialSummary(loanInfoDTO));
 	}
 
 	@DisplayName("Should throws FirstPaymentDateOutOfRangeException")
@@ -41,9 +39,7 @@ class LoanCalculatorServiceImplTest
 		loanInfoDTO.setFinalDate(finalDate);
 		loanInfoDTO.setFirstPaymentDate(paymentDate);
 
-		assertThrows(FirstPaymentDateOutOfRangeException.class, () -> {
-			loanCalculatorService.getLoanFinancialSummary(loanInfoDTO);
-		});
+		assertThrows(FirstPaymentDateOutOfRangeException.class, () -> loanCalculatorService.getLoanFinancialSummary(loanInfoDTO));
 	}
 
 }
